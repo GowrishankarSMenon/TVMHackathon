@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
@@ -15,15 +15,41 @@ import {
 } from "@/components/ui/pagination"
 import { Slider } from "@/components/ui/slider"
 import { Search, FileText } from "lucide-react"
+import { getContract } from "@/utils/contract" // Move import here
+
+type Report = {
+  id: string;
+  name: string;
+  description: string;
+  drugType: string;
+  activityType: string;
+  lastSeen: string;
+  status: "pending" | "verified" | "rejected";
+};
 
 export default function ReportsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [aiScoreRange, setAiScoreRange] = useState([1, 10])
-  const [radiusFilter, setRadiusFilter] = useState(25)
+  const [reports, setReports] = useState<Report[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [aiScoreRange, setAiScoreRange] = useState([1, 10]);
+  const [radiusFilter, setRadiusFilter] = useState(25);
 
-  // No data to display initially
-  const reports: any[] = []
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const contract = await getContract();
+        if (!contract) return;
+
+        const reportsData = await contract.getAllReports();
+        console.log("Fetched Reports:", reportsData); // Debugging
+        setReports(reportsData);
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -44,7 +70,7 @@ export default function ReportsPage() {
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by location..."
+                  placeholder="Search by name..."
                   className="pl-9"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -123,15 +149,28 @@ export default function ReportsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead className="hidden md:table-cell">Details</TableHead>
-                      <TableHead>AI Score</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Drug Type</TableHead>
+                      <TableHead>Activity Type</TableHead>
+                      <TableHead>Last Seen</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>{/* Reports would be mapped here */}</TableBody>
+                  <TableBody>
+                    {reports.map((report) => (
+                      <TableRow key={report.id}>
+                        <TableCell>{report.name}</TableCell>
+                        <TableCell>{report.description}</TableCell>
+                        <TableCell>{report.drugType}</TableCell>
+                        <TableCell>{report.activityType}</TableCell>
+                        <TableCell>{report.lastSeen}</TableCell>
+                        <TableCell className={`capitalize ${report.status === "verified" ? "text-green-500" : report.status === "rejected" ? "text-red-500" : "text-yellow-500"}`}>
+                          {report.status}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </Table>
               </div>
 
@@ -157,4 +196,3 @@ export default function ReportsPage() {
     </div>
   )
 }
-

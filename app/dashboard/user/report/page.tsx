@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-
+import { getContract } from "@/utils/contract"
 const Map = dynamic(() => import("@/components/map"), { ssr: false })
 
 export default function ReportPage() {
@@ -23,23 +23,43 @@ export default function ReportPage() {
   const [confirmedEmergency, setConfirmedEmergency] = useState(false)
 
   const [formData, setFormData] = useState({
-    location: "",
-    latitude: null as number | null,
-    longitude: null as number | null,
     peopleInvolved: "",
     drugType: "",
     activityType: "",
-    frequency: "",
     lastSeen: "",
-    evidence: null as File | null,
     additionalInfo: "",
-    immediateDanger: "",
-  })
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const submitReport = async () => {
+    try {
+      const contract = await getContract();
+      if (!contract) return;
+
+      const tx = await contract.submitReport(
+        formData.peopleInvolved,
+        "drug report ......",
+        formData.drugType,
+        formData.activityType,
+        formData.lastSeen,
+        formData.additionalInfo
+      );
+      await tx.wait();
+      alert("Report submitted successfully!");
+      setFormData({
+        peopleInvolved: "",
+        drugType: "",
+        activityType: "",
+        lastSeen: "",
+        additionalInfo: "",
+      });
+    } catch (error) {
+      console.error("Error submitting report:", error);
+    }
+  };
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }))
@@ -112,7 +132,7 @@ export default function ReportPage() {
 
       {(!isEmergency || confirmedEmergency) && (
         <Card>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={submitReport}>
             <CardHeader>
               <CardTitle>{isEmergency ? "Emergency Report Details" : "Case Details"}</CardTitle>
               <CardDescription>
@@ -124,30 +144,29 @@ export default function ReportPage() {
                 <Label>Location</Label>
                 <Map onSelectLocation={handleLocationSelect} />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="peopleInvolved">People Involved</Label>
                 <Input id="peopleInvolved" name="peopleInvolved" value={formData.peopleInvolved} onChange={handleInputChange} />
               </div>
-
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input id="description" name="description" value="drug report ......" readOnly />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="drugType">Type of Drug</Label>
                 <Input id="drugType" name="drugType" value={formData.drugType} onChange={handleInputChange} />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="activityType">Type of Activity</Label>
                 <Input id="activityType" name="activityType" value={formData.activityType} onChange={handleInputChange} />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="frequency">How often does it happen?</Label>
-                <Input id="frequency" name="frequency" value={formData.frequency} onChange={handleInputChange} />
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="lastSeen">When was this last seen?</Label>
                 <Input id="lastSeen" name="lastSeen" value={formData.lastSeen} onChange={handleInputChange} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="additionalInfo">Additional Information</Label>
+                <Textarea id="additionalInfo" name="additionalInfo" value={formData.additionalInfo} onChange={handleInputChange} />
               </div>
             </CardContent>
             <CardFooter>
