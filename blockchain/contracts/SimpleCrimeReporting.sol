@@ -65,4 +65,12 @@ contract SimpleCrimeReporting {
         require(_reportId > 0 && _reportId <= reports.length, "Invalid report ID");
         return reports[_reportId - 1];
     }
+   // Solidity function in the smart contract
+
+    event Received(address sender, uint256 amount);
+
+    function receiveEther() public payable {
+        require(msg.value > 0, "Must send some ETH");
+        emit Received(msg.sender, msg.value);
+    }
 }

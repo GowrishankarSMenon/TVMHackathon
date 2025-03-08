@@ -1,45 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\ebin\\Desktop\\hackathon\\blockchain\\contracts\\SimpleCrimeReporting.sol": {
-      "lastModificationDate": 1741417412713,
-      "contentHash": "14857d75494be70dcc5ce3e8f21e0ec5",
-      "sourceName": "contracts/SimpleCrimeReporting.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "SimpleCrimeReporting"
-      ]
-    },
     "C:\\Users\\ebin\\Desktop\\New folder\\TVMHackathon\\blockchain\\contracts\\SimpleCrimeReporting.sol": {
-      "lastModificationDate": 1741417412713,
-      "contentHash": "14857d75494be70dcc5ce3e8f21e0ec5",
+      "lastModificationDate": 1741428886828,
+      "contentHash": "abdd7f739ac3c9b432bc5d5dba4212bd",
       "sourceName": "contracts/SimpleCrimeReporting.sol",
       "solcConfig": {
         "version": "0.8.28",
