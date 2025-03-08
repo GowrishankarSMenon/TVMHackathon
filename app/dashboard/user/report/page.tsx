@@ -21,7 +21,7 @@ export default function ReportPage() {
   const [isEmergency, setIsEmergency] = useState(false)
   const [showEmergencyWarning, setShowEmergencyWarning] = useState(false)
   const [confirmedEmergency, setConfirmedEmergency] = useState(false)
-
+  const [validationResult, setValidationResult] = useState("");
   const [formData, setFormData] = useState({
     location: "",
     latitude: null as number | null,
