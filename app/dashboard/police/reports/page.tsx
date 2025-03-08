@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/pagination"
 import { Slider } from "@/components/ui/slider"
 import { Search, FileText } from "lucide-react"
+import { ethers, utils } from "ethers"
 import { getContract } from "@/utils/contract" // Move import here
 
 type Report = {
@@ -50,7 +51,26 @@ export default function ReportsPage() {
 
     fetchReports();
   }, []);
+  const handlePay = async () => {
+    try {
+      if (!window.ethereum) throw new Error("No crypto wallet found");
+  
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = await getContract();
+      if (!contract) return;
 
+  
+      const tx = await contract.receiveEther({
+        value: ethers.parseEther("1"),
+      });
+  
+      await tx.wait();
+      console.log("Transaction successful:", tx.hash);
+    } catch (error) {
+      console.error("Error sending ETH:", error);
+    }
+  };
   return (
     <div className="space-y-6">
       <div>
@@ -165,8 +185,24 @@ export default function ReportsPage() {
                         <TableCell>{report.drugType}</TableCell>
                         <TableCell>{report.activityType}</TableCell>
                         <TableCell>{report.lastSeen}</TableCell>
-                        <TableCell className={`capitalize ${report.status === "verified" ? "text-green-500" : report.status === "rejected" ? "text-red-500" : "text-yellow-500"}`}>
+                        <TableCell
+                          className={`capitalize ${
+                            report.status === "verified"
+                              ? "text-green-500"
+                              : report.status === "rejected"
+                              ? "text-red-500"
+                              : "text-yellow-500"
+                          }`}
+                        >
                           {report.status}
+                        </TableCell>
+                        <TableCell>
+                          <button
+                            onClick={handlePay}
+                            className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                          >
+                            Pay
+                          </button>
                         </TableCell>
                       </TableRow>
                     ))}
