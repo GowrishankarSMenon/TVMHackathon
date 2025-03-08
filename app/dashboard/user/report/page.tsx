@@ -51,9 +51,35 @@ export default function ReportPage() {
     }
   }
 
+  async function validateReport() {
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer YOUR_OPENAI_API_KEY`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: "Validate the following report for completeness and authenticity." },
+            { role: "user", content: JSON.stringify(formData) },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      setValidationResult(data.choices[0].message.content.trim());
+    } catch (error) {
+      console.error("Error validating report:", error);
+      setValidationResult("Error validating report. Please try again later.");
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -78,6 +104,34 @@ export default function ReportPage() {
   }
 
   return (
+      <>
+        <div className={`space-y-6 ${isEmergency ? "bg-red-100 p-6 rounded-md" : ""}`}>
+          <div>
+            <h1 className="text-3xl font-bold">{isEmergency ? "Emergency Report" : "Report Drug Activity"}</h1>
+            <p className="text-muted-foreground">
+              {isEmergency
+                  ? "Your report will be prioritized for immediate review."
+                  : "Help make your community safer by reporting drug-related activities anonymously."}
+            </p>
+          </div>
+
+          <Card>
+            <CardContent>
+              <Label htmlFor="report">Report Details</Label>
+              <Textarea
+                  id="report"
+                  name="additionalInfo"
+                  value={formData.additionalInfo}
+                  onChange={handleInputChange}
+                  placeholder="Enter report details..."
+              />
+              {validationResult && <p className="mt-2 text-sm text-gray-700">Validation Result: {validationResult}</p>}
+            </CardContent>
+            <CardFooter>
+              <Button onClick={validateReport}>Validate Report</Button>
+            </CardFooter>
+          </Card>
+        </div>
     <div className={`space-y-6 ${isEmergency ? "bg-red-100 p-6 rounded-md" : ""}`}>
       <div>
         <h1 className="text-3xl font-bold">{isEmergency ? "Emergency Report" : "Report Drug Activity"}</h1>
@@ -159,5 +213,6 @@ export default function ReportPage() {
         </Card>
       )}
     </div>
+        </>
   )
 }
